@@ -1,9 +1,13 @@
 [tool.poetry]
 name = "exposure"
+description = "tool for compute with exposure settings and metrics for cameras"
 version = "0.1.0"
-description = ""
 authors = ["Marc Rijken <marc@rijken.org>"]
-
+license = "MIT"
+readme = "README.md"
+packages = [
+    { include = "exposure" },
+]
 [tool.poetry.dependencies]
 python = ">=3.6,<4.0"
 
@@ -13,7 +17,6 @@ pylint = "^2.6.0"
 pytest-cov = ">=2.10.1"
 mypy = ">=0.790"
 isort = "^5.6.4"
-
 
 [tool.black]
 line_length = 120
