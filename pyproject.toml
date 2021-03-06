@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "exposure"
 description = "tool for compute with exposure settings and metrics for cameras"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Marc Rijken <marc@rijken.org>"]
 license = "MIT"
 repository = "https://github.com/mrijken/exposure"
