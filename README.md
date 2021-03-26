@@ -1,6 +1,7 @@
 # Exposure
 
 ![Build](https://github.com/mrijken/exposure/workflows/CI/badge.svg)
+![Hits](https://hitcounter.pythonanywhere.com/count/tag.svg?urlhttps://github.com/mrijken/exposure)
 
 With Exposure you can compute the exposure for a photo camera based
 on settings of the camera and metrics of the environment.
