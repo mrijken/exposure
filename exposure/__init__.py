@@ -72,10 +72,7 @@ class Exposure:
 
         ex = Exposure.from_stop(0)
         for exposure in exposures:
-            if exposure.__class__ in {Sv, Bv, Iv}:
-                ex = ex + exposure
-            else:
-                ex = ex - exposure
+            ex = ex + exposure if exposure.__class__ in {Sv, Bv, Iv} else ex - exposure
         return cls.from_stop(ex.stop if cls in {Av, Tv} else -ex.stop)
 
 
