@@ -3,3 +3,4 @@ __pycache__
 .vscode/
 .mpypy_cache/
 dist
+.venv

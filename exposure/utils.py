@@ -2,9 +2,12 @@
 A collection of helpers
 """
 import math
+from typing import TypeVar
+
+T = TypeVar("T", float, int)
 
 
-def floor(number, signficant_digits):
+def floor(number: T, signficant_digits: int) -> T:
     """
     >>> floor(1234, 2)
     1200

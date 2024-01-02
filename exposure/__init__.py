@@ -5,9 +5,11 @@ import decimal
 import math
 from decimal import Decimal
 from fractions import Fraction
-from typing import Type, Union
+from typing import TypeVar
 
 from exposure.utils import floor
+
+T = TypeVar("T")
 
 
 class Exposure:
@@ -17,26 +19,26 @@ class Exposure:
 
     stop: Fraction
 
-    def __init__(self, stop: Fraction):
+    def __init__(self, stop: Fraction) -> None:
         self.stop = stop.limit_denominator(3)
 
-    def __add__(self, other: "Exposure"):
+    def __add__(self: T, other: T) -> T:
         if not isinstance(other, Exposure):
             raise TypeError("Exposure expected")
         return Exposure(self.stop + other.stop)
 
-    def __sub__(self, other: "Exposure"):
+    def __sub__(self: T, other: T) -> T:
         if not isinstance(other, Exposure):
             raise TypeError("Exposure expected")
         return Exposure(self.stop - other.stop)
 
-    def __eq__(self, other: object):
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, Exposure):
             raise TypeError("Exposure expected")
         return self.stop == other.stop
 
     @classmethod
-    def from_stop(cls, stop: Union[float, Fraction]):
+    def from_stop(cls: T, stop: float | Fraction) -> T:
         """
         Exposure Factory from `stop` parameter.
 
@@ -51,7 +53,7 @@ class Exposure:
         return cls(stop=stop)
 
     @classmethod
-    def from_exposures(cls, *exposures: "Exposure"):
+    def from_exposures(cls, *exposures: T) -> T:
         """
         Calculate a setting
 
@@ -64,7 +66,7 @@ class Exposure:
 
         """
         exp_classes = {i.__class__ for i in exposures}
-        if len(exp_classes) != 3 and not exp_classes.intersection({Bv, Iv}):
+        if len(exp_classes) != 3 and not exp_classes.intersection({Bv, Iv}):  # noqa: PLR2004
             raise TypeError("3 different items from Tv, Sv, Av and Iv/Bv needed")
 
         if cls in exp_classes:
@@ -83,13 +85,13 @@ class Av(Exposure):
     aperture (larger f/number) and thus less exposure.
     """
 
-    def __init__(self, stop: Fraction):
+    def __init__(self, stop: Fraction) -> None:
         super().__init__(stop)
         self.precise = self._stop_to_fstop_precise(self.stop)
         self.fstop = self._stop_to_fstop(self.stop)
 
     @classmethod
-    def from_fstop(cls, fstop: Union[float, decimal.Decimal]):
+    def from_fstop(cls, fstop: float | decimal.Decimal) -> "Av":
         """
         Av Factory with a `fstop` as parameter.
 
@@ -103,7 +105,7 @@ class Av(Exposure):
         return cls(stop=cls._fstop_to_stop(fstop))
 
     @classmethod
-    def from_focal_length_and_diameter(cls, focal_length_in_mm: float, diameter_in_mm: float):
+    def from_focal_length_and_diameter(cls, focal_length_in_mm: float, diameter_in_mm: float) -> "Av":
         """
         Av Factory with a `focal_length_in_mm` and `diameter_in_mm` as parameter.
 
@@ -114,7 +116,7 @@ class Av(Exposure):
         return cls.from_fstop(focal_length_in_mm / diameter_in_mm)
 
     @staticmethod
-    def _fstop_to_stop(fstop: Union[float, decimal.Decimal]) -> Fraction:
+    def _fstop_to_stop(fstop: float | decimal.Decimal) -> Fraction:
         """
         >>> Av._fstop_to_stop(1.4)
         Fraction(1, 1)
@@ -153,7 +155,7 @@ class Av(Exposure):
         """
         return math.sqrt(2) ** float(stop)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Av f/{self.fstop}"
 
 
@@ -173,12 +175,12 @@ class Sv(Exposure):
     Fraction(0, 1)
     """
 
-    def __init__(self, stop: Fraction):
+    def __init__(self, stop: Fraction) -> None:
         super().__init__(stop)
-        self.iso = 100 * 2 ** stop
+        self.iso = 100 * 2**stop
 
     @classmethod
-    def from_iso(cls, iso: float):
+    def from_iso(cls, iso: float) -> "Sv":
         """
         Sv Factory with `iso` as parameter.
 
@@ -202,7 +204,7 @@ class Tv(Exposure):
     exposure.
     """
 
-    all_nominal_third_stops_from_min15 = [
+    all_nominal_third_stops_from_min15 = [  # noqa: RUF012
         Fraction(1, 32000),
         Fraction(1, 25600),
         Fraction(1, 20000),
@@ -266,19 +268,19 @@ class Tv(Exposure):
         Fraction(30, 1),
     ]
 
-    stop2time = {Fraction(-15) + Fraction(idx, 3): v for idx, v in enumerate(all_nominal_third_stops_from_min15)}
-    time2stop = {v: Fraction(-15) + Fraction(idx, 3) for idx, v in enumerate(all_nominal_third_stops_from_min15)}
+    stop2time = {Fraction(-15) + Fraction(idx, 3): v for idx, v in enumerate(all_nominal_third_stops_from_min15)}  # noqa: RUF012
+    time2stop = {v: Fraction(-15) + Fraction(idx, 3) for idx, v in enumerate(all_nominal_third_stops_from_min15)}  # noqa: RUF012
 
     def __init__(
         self,
         stop: Fraction,
-    ):
+    ) -> None:
         super().__init__(stop)
-        self.precise = 2 ** self.stop
+        self.precise = 2**self.stop
         self.time = self.stop2time[self.stop]
 
     @classmethod
-    def from_time(cls, duration_in_sec: Fraction):
+    def from_time(cls, duration_in_sec: Fraction) -> "Tv":
         """
         Tv Factory with `duration_in_sec` as parameter.
 
@@ -311,33 +313,33 @@ class Bv(Exposure):
     Fraction(5, 1)
     """
 
-    def __init__(self, stop: Fraction):
+    def __init__(self, stop: Fraction) -> None:
         super().__init__(stop)
         self.candelas = self._candelas_from_stop(stop)
         self.foot_lamberts = self._foot_lamberts_from_stop(stop)
 
     @classmethod
-    def _candelas_from_stop(cls, stop: Union[float, Fraction]):
+    def _candelas_from_stop(cls, stop: float | Fraction) -> float:
         """
         >>> Bv._candelas_from_stop(0)
         3.4
         >>> Bv._candelas_from_stop(1)
         6.9
         """
-        return round(2 ** stop * 3.4262591, 1)
+        return round(2**stop * 3.4262591, 1)
 
     @classmethod
-    def _foot_lamberts_from_stop(cls, stop: Fraction):
+    def _foot_lamberts_from_stop(cls, stop: Fraction) -> float:
         """
         >>> Bv._foot_lamberts_from_stop(0)
         1
         >>> Bv._foot_lamberts_from_stop(1)
         2
         """
-        return 2 ** stop
+        return 2**stop
 
     @classmethod
-    def from_candelas(cls, candelas: float):
+    def from_candelas(cls, candelas: float) -> "Bv":
         """
         Bv Factory with `candelas` as parameter.
 
@@ -348,7 +350,7 @@ class Bv(Exposure):
         return cls(Fraction(stop))
 
     @classmethod
-    def from_foot_lamberts(cls, foot_lamberts: float):
+    def from_foot_lamberts(cls, foot_lamberts: float) -> "Bv":
         """
         Bv Factory with `foot_lamberts` as parameter.
 
@@ -380,33 +382,33 @@ class Iv(Exposure):
     Fraction(4, 1)
     """
 
-    def __init__(self, stop: Fraction):
+    def __init__(self, stop: Fraction) -> None:
         super().__init__(stop)
         self.foot_candles = self._foot_candles_from_stop(stop)
         self.lux = self._lux_from_stop(stop)
 
     @classmethod
-    def _foot_candles_from_stop(cls, stop: Fraction):
+    def _foot_candles_from_stop(cls, stop: Fraction) -> float:
         """
         >>> Iv._foot_candles_from_stop(0)
         6.2
         >>> Iv._foot_candles_from_stop(1)
         12.5
         """
-        return round(2 ** stop * 0.3 * 20.8, 1)
+        return round(2**stop * 0.3 * 20.8, 1)
 
     @classmethod
-    def _lux_from_stop(cls, stop: Fraction):
+    def _lux_from_stop(cls, stop: Fraction) -> float:
         """
         >>> Iv._lux_from_stop(0)
         67.2
         >>> Iv._lux_from_stop(1)
         134.4
         """
-        return round(2 ** stop * 0.3 * 224, 1)
+        return round(2**stop * 0.3 * 224, 1)
 
     @classmethod
-    def from_foot_candles(cls, foot_candles: float):
+    def from_foot_candles(cls, foot_candles: float) -> "Iv":
         """
         Iv Factory from `foot_candles` parameter.
 
@@ -417,7 +419,7 @@ class Iv(Exposure):
         return cls(Fraction(stop))
 
     @classmethod
-    def from_lux(cls, lux: float):
+    def from_lux(cls, lux: float) -> "Iv":
         """
         Iv Factory from `lux` parameter.
 
