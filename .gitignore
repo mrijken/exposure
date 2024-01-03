@@ -4,3 +4,8 @@ __pycache__
 .mpypy_cache/
 dist
 .venv
+
+# Added by cargo
+
+/target
+/Cargo.lock
